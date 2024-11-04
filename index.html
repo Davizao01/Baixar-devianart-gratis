@@ -3,96 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot Completo</title>
+    <title>Chatbot Aprendiz</title>
     <style>
+        /* Design escuro e moderno */
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-            background-color: #f4f4f9;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        #chat-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #1f1f1f;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         #chat {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            text-align: left;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
             padding: 20px;
-            height: 400px;
-            overflow-y: scroll;
-            border: 1px solid #ddd;
+            overflow-y: auto;
         }
 
         .message {
             margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
         }
 
         .user {
-            text-align: right;
-            color: blue;
+            align-self: flex-end;
+            background-color: #007bff;
         }
 
         .bot {
-            text-align: left;
-            color: green;
+            align-self: flex-start;
+            background-color: #333;
         }
 
-        input[type="text"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-top: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        #userInput {
+            padding: 15px;
+            border: none;
+            width: 100%;
+            box-sizing: border-box;
+            border-top: 1px solid #444;
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        #userInput::placeholder {
+            color: #888;
         }
     </style>
 </head>
 <body>
-    <h1>Chatbot Completo</h1>
-    <div id="chat"></div>
-    <input type="text" id="userInput" placeholder="Digite sua mensagem...">
+    <h1>Chatbot Aprendiz</h1>
+    <div id="chat-container">
+        <div id="chat"></div>
+        <input type="text" id="userInput" placeholder="Digite sua mensagem...">
+    </div>
 
     <script>
-        const responses = {
-            "oi": "Olá! Como posso te ajudar hoje?",
-            "como você está?": "Estou ótimo! E você?",
-            "qual é o seu nome?": "Eu sou um chatbot, seu assistente virtual!",
-            "o que você sabe fazer?": "Posso responder perguntas, conversar e ajudar com informações básicas.",
-            "tchau": "Até logo! Se cuide!",
+        const socket = new WebSocket('ws://localhost:8080');
+
+        socket.onmessage = function(event) {
+            addMessage('bot', event.data);
         };
-
-        function processMessage(message) {
-            message = message.toLowerCase().trim();
-
-            // Respostas pré-definidas
-            if (responses[message]) {
-                return responses[message];
-            }
-
-            // Respostas dinâmicas baseadas em palavras-chave
-            if (message.includes("tempo")) {
-                return "Eu não posso prever o tempo, mas você pode conferir a previsão online!";
-            }
-
-            if (message.includes("ajuda")) {
-                return "Claro! Estou aqui para ajudar. O que você precisa?";
-            }
-
-            return "Desculpe, não entendi. Pode reformular a pergunta?";
-        }
 
         document.getElementById('userInput').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
-                const userMessage = this.value;
-                addMessage('user', userMessage);
+                const message = this.value;
+                addMessage('user', message);
+                socket.send(message);
                 this.value = '';
-
-                const botResponse = processMessage(userMessage);
-                setTimeout(() => {
-                    addMessage('bot', botResponse);
-                }, 500); // Simula tempo de resposta
             }
         });
 
