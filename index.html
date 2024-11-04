@@ -1,73 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Formatter</title>
+    <title>Chatbot Completo</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 20px;
+            background-color: #f4f4f9;
         }
 
-        #canvas-container {
-            margin-top: 20px;
+        #chat {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            height: 400px;
+            overflow-y: scroll;
+            border: 1px solid #ddd;
         }
 
-        canvas {
-            image-rendering: pixelated;
-            width: 400px;
-            height: auto;
+        .message {
+            margin: 10px 0;
+        }
+
+        .user {
+            text-align: right;
+            color: blue;
+        }
+
+        .bot {
+            text-align: left;
+            color: green;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Image Formatter</h1>
-    <input type="file" id="fileInput" accept="image/*">
-    <div id="canvas-container">
-        <canvas id="imageCanvas"></canvas>
-    </div>
-    <button id="downloadBtn">Download PNG</button>
+    <h1>Chatbot Completo</h1>
+    <div id="chat"></div>
+    <input type="text" id="userInput" placeholder="Digite sua mensagem...">
 
     <script>
-        const fileInput = document.getElementById('fileInput');
-        const canvas = document.getElementById('imageCanvas');
-        const ctx = canvas.getContext('2d');
-        const downloadBtn = document.getElementById('downloadBtn');
+        const responses = {
+            "oi": "Olá! Como posso te ajudar hoje?",
+            "como você está?": "Estou ótimo! E você?",
+            "qual é o seu nome?": "Eu sou um chatbot, seu assistente virtual!",
+            "o que você sabe fazer?": "Posso responder perguntas, conversar e ajudar com informações básicas.",
+            "tchau": "Até logo! Se cuide!",
+        };
 
-        fileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.src = e.target.result;
-                    img.onload = function() {
-                        const scaleFactor = 10; // Adjust this for pixelation effect
-                        canvas.width = img.width / scaleFactor;
-                        canvas.height = img.height / scaleFactor;
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        const pixelatedImage = new Image();
-                        pixelatedImage.src = canvas.toDataURL();
-                        pixelatedImage.onload = function() {
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            ctx.imageSmoothingEnabled = false;
-                            ctx.drawImage(pixelatedImage, 0, 0, canvas.width, canvas.height);
-                        }
-                    }
-                }
-                reader.readAsDataURL(file);
+        function processMessage(message) {
+            message = message.toLowerCase().trim();
+
+            // Respostas pré-definidas
+            if (responses[message]) {
+                return responses[message];
+            }
+
+            // Respostas dinâmicas baseadas em palavras-chave
+            if (message.includes("tempo")) {
+                return "Eu não posso prever o tempo, mas você pode conferir a previsão online!";
+            }
+
+            if (message.includes("ajuda")) {
+                return "Claro! Estou aqui para ajudar. O que você precisa?";
+            }
+
+            return "Desculpe, não entendi. Pode reformular a pergunta?";
+        }
+
+        document.getElementById('userInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                const userMessage = this.value;
+                addMessage('user', userMessage);
+                this.value = '';
+
+                const botResponse = processMessage(userMessage);
+                setTimeout(() => {
+                    addMessage('bot', botResponse);
+                }, 500); // Simula tempo de resposta
             }
         });
 
-        downloadBtn.addEventListener('click', function() {
-            const link = document.createElement('a');
-            link.download = 'formatted-image.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        });
+        function addMessage(sender, message) {
+            const chat = document.getElementById('chat');
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', sender);
+            messageElement.innerText = message;
+            chat.appendChild(messageElement);
+            chat.scrollTop = chat.scrollHeight;
+        }
     </script>
 </body>
 </html>
